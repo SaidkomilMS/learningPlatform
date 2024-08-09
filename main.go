@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -26,6 +27,12 @@ func main() {
 	}
 
 	api.SetupRoutes(router, cfg, db)
+	corsOpts := handlers.CORS(
+		handlers.AllowedOrigins([]string{"http://localhost:3000"}), // Allow specific origin
+		handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+		handlers.AllowCredentials(), // Allow credentials
+	)
 
-	log.Fatal(http.ListenAndServe(":8000", router))
+	log.Fatal(http.ListenAndServe(":8000", corsOpts(router)))
 }
