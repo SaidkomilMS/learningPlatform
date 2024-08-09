@@ -8,8 +8,11 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
+	DBString := fmt.Sprintf("user=%s password=%s dbname=%s host=%s sslmode=disable",
+		os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_HOST"))
 	return &Config{
-		DBSource:     "host=localhost user=learning_platform password=test_password dbname=learning_platform_db port=5432 sslmode=disable TimeZone=Asia/Tashkent",
+		//DBSource:     "host=" + host + "user=" + user + " password=" + password + " dbname=" + dbname + " port=" + port + " sslmode=disable TimeZone=Asia/Tashkent",
+		DBSource:     DBString,
 		JWTLifeTime:  1 * 60 * 60 * 1000000000,
 		JWTSecretKey: "your_secret_key_here",
 		JWTIssuer:    "learning_platform",
