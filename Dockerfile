@@ -1,4 +1,4 @@
-FROM golang:1.17 as builder
+FROM golang:1.22 as builder
 LABEL authors="saidkomilmakhamadkhojayev"
 
 # Set the Current Working Directory inside the container
@@ -21,13 +21,34 @@ FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates
 
+# Install necessary packages
+RUN apk add --no-cache ca-certificates postgresql-client curl
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev go
+
+# Set up Go environment (only if compiling goose directly in Alpine)
+ENV GOPATH /go
+ENV PATH /go/bin:$PATH
+
+# Install goose
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest
+
+# Clean up unnecessary packages
+RUN apk del .build-deps
+
 WORKDIR /root/
+#go install github.com/pressly/goose/v3/cmd/goose@latest
 
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /app/main .
+COPY --from=builder /app/migrations ./migrations
+COPY --from=builder /app/entrypoint.sh .
+
+RUN chmod +x /root/entrypoint.sh
 
 # Expose port 8000 to the outside world
 EXPOSE 8000
+
+ENTRYPOINT ["/root/entrypoint.sh"]
 
 # Command to run the executable
 CMD ["./main"]
